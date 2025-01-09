@@ -1,0 +1,5 @@
+panduan penggunaan program
+
+download zip program
+pastikan flask sudah terinstall
+kemudian tulis command 'python app.py' di terminal
