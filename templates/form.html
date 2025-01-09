@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='form.css') }}" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Logo">
+    <div class="form-container">
+        <form id="form" action="{{ url_for('predict') }}" method="POST">
+            <div class="form-fields">
+                <div class="column-left">
+                    <!-- Left Column -->
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" required>
+                            <option value="0">Entertainment</option>
+                            <option value="1">Food Dining</option>
+                            <option value="2">Gas Transport</option>
+                            <option value="3">Grocery Net</option>
+                            <option value="4">Grocery Pos</option>
+                            <option value="5">Health Fitness</option>
+                            <option value="6">Home</option>
+                            <option value="7">Kids Pets</option>
+                            <option value="8">Misc Net</option>
+                            <option value="9">Misc Pos</option>
+                            <option value="10">Personal Care</option>
+                            <option value="11">Shopping Net</option>
+                            <option value="12">Shopping Pos</option>
+                            <option value="13">Travel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amt">Amount</label>
+                        <input type="number" id="amt" name="amt" placeholder="$" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <select id="age" name="age" required>
+                            <option value="0">18-25</option>
+                            <option value="1">26-35</option>
+                            <option value="2">36-49</option>
+                            <option value="3">50-69</option>
+                            <option value="4">70-90</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="time_category">Time Category</label>
+                        <select id="time_category" name="time_category" required>
+                            <option value="2">Morning</option>
+                            <option value="0">Day</option>
+                            <option value="1">Evening</option>
+                            <option value="3">Night</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="column-right">
+                    <!-- Right Column -->
+                    <div class="form-group">
+                        <label for="day_of_week">Day</label>
+                        <select id="day_of_week" name="day_of_week" required>
+                            <option value="3">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="5">Tuesday</option>
+                            <option value="6">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="0">Friday</option>
+                            <option value="2">Saturday</option>                         
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="month">Month</label>
+                        <select id="month" name="month" required>
+                            <option value="4">January</option>
+                            <option value="3">February</option>
+                            <option value="7">March</option>
+                            <option value="0">April</option>
+                            <option value="8">May</option>
+                            <option value="6">June</option>
+                            <option value="5">July</option>
+                            <option value="1">August</option>
+                            <option value="11">September</option>
+                            <option value="10">October</option>
+                            <option value="9">November</option>
+                            <option value="2">December</option>    
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="profession">Profession</label>
+                        <select id="profession" name="profession" required>
+                            <option value="0">Business, Finance, and Law</option>
+                            <option value="1">Construction, Planning, and Environment</option>
+                            <option value="2">Creative Arts, Design, and Media</option>
+                            <option value="3">Education, Training, and Research</option>
+                            <option value="4">Healthcare, Therapy, and Well-being</option>
+                            <option value="5">IT and Information Systems</option>
+                            <option value="7">Pilot</option>
+                            <option value="8">Public Sector, Civil Service, and Government</option>
+                            <option value="9">Science, Engineering, and Technology</option>
+                            <option value="6">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" class="back-button" onclick="window.location.href='/'">Back</button>
+                        <button type="button" class="submit-button" id="detect-button">Detect</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- Modal HTML -->
+    <div id="popup-modal" class="modal">
+        <div class="modal-content">
+            <p id="result-text">Processing...</p>
+            <button class="close-btn" id="close-modal">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+        const detectButton = document.getElementById('detect-button');
+        const modal = document.getElementById('popup-modal');
+        const closeModal = document.getElementById('close-modal');
+        const resultText = document.getElementById('result-text');
+
+        detectButton.addEventListener('click', async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch("{{url_for('predict')}}", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const data = await response.json(); 
+                    resultText.textContent = `Fraud detection result: ${data.result}`; 
+                } else {
+                    resultText.textContent = "Error: Unable to get result.";
+                }
+            } catch (error) {
+                resultText.textContent = "Error: Something went wrong.";
+            }
+
+            modal.style.display = 'block'; 
+        });
+
+        closeModal.addEventListener('click', function () {
+            modal.style.display = 'none'; 
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+    </script>
+</body>
+</html>
